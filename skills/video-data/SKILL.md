@@ -104,6 +104,8 @@ Contact Oxylabs sales team to get a dedicated high-bandwidth endpoint.
 - Port: `60000`
 - Endpoint: Provided after purchase
 
+Use `OXY_HB_ENDPOINT`; if absent, check `OXYLABS_HB_ENDPOINT`.
+
 ### Connection Test
 
 ```bash

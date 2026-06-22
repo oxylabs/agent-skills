@@ -13,6 +13,9 @@ Remote headless browser service with built-in anti-detection and proxy integrati
 wss://USERNAME:PASSWORD@ubc.oxylabs.io
 ```
 
+Use `OXY_UNBLOCKER_USERNAME` / `OXY_UNBLOCKER_PASSWORD`; if absent, check
+`OXY_HB_USERNAME` / `OXY_HB_PASSWORD`.
+
 ## Browser Types
 
 | Type | Best For |
