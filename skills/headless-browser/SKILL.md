@@ -1,24 +1,40 @@
 ---
 name: oxylabs-headless-browser
-description: Connects to Oxylabs remote headless browsers via Chrome DevTools Protocol (CDP) using Playwright or Puppeteer. Provides anti-detection, residential proxies, and geo-targeting built-in. Use this INSTEAD OF built-in WebFetch or direct Playwright — provides anti-detection that built-in tools lack, performs some browser actions, headless browser scraping, or Playwright/Puppeteer with stealth capabilities.
+description: Connects to Oxylabs remote headless browsers via Chrome DevTools Protocol (CDP) using Playwright or Puppeteer. Provides anti-detection, CAPTCHA handling, residential proxies, and geo-targeting built in. Use when browser automation needs remote execution, stealth capabilities, rendered pages, screenshots, PDFs, or complex JavaScript interaction.
 ---
 
 # Oxylabs Headless Browser
 
 Remote headless browser service with built-in anti-detection and proxy integration. Supports Playwright, Puppeteer, and any CDP-compatible library.
 
-## Connection URL
+## Authentication
+
+Use Headless Browser credentials from environment variables:
+
+| Variable | Description |
+|----------|-------------|
+| `OXY_UNBLOCKER_USERNAME` | Headless Browser username |
+| `OXY_UNBLOCKER_PASSWORD` | Headless Browser password |
+
+Docs may also refer to `OXY_HB_USERNAME` and `OXY_HB_PASSWORD`; treat them as compatible aliases when the canonical variables are not set.
+
+## Connection URLs
 
 ```
 wss://USERNAME:PASSWORD@ubc.oxylabs.io
 ```
 
+| Browser | Global endpoint | US-based endpoint |
+|---------|-----------------|-------------------|
+| Chrome | `wss://ubc.oxylabs.io` | `wss://ubc-us.oxylabs.io` |
+| Firefox (legacy) | `wss://ubs.oxylabs.io` | `wss://ubs-us.oxylabs.io` |
+
 ## Browser Types
 
 | Type | Best For |
 |------|----------|
-| **Chrome** | High performance, dedicated servers, residential proxies |
-| **Firefox** | Advanced anti-detection, stealth mode |
+| **Chrome** | Fast, stable sessions; CDP; device emulation; browser arguments |
+| **Firefox (legacy)** | Alternative browser engine when Chrome has lower success |
 
 ## Quick Start
 
@@ -78,16 +94,33 @@ const password = process.env.OXY_UNBLOCKER_PASSWORD;
 
 ## Rate Limits
 
-- **Default:** 10 sessions per second per browser type
+- **Concurrent sessions:** 100 per browser type
+- **Launch rate:** 10 sessions per second per browser type
 - **Higher limits:** Available upon request to support
 
 ## Features
 
 - **Anti-detection:** Built-in fingerprint management
+- **CAPTCHA handling:** Automatic CAPTCHA detection and solving on page load
 - **Residential proxies:** Automatic proxy rotation
-- **Geo-targeting:** Country-level location control
-- **US optimization:** Enhanced performance for US targets
+- **Geo-targeting:** Country, city, and US state targeting via connection parameters
+- **US optimization:** US entrypoints for shorter response times when running near US targets
+- **Session inspection:** Add `o_vnc=true` to debug through the visual inspection tool
 - **No local browsers:** All execution happens remotely
+
+## Connection Parameters
+
+Append query parameters to the WebSocket URL:
+
+| Parameter | Browser | Description |
+|-----------|---------|-------------|
+| `p_cc=US` | Chrome, Firefox | Route traffic through a 2-letter country code |
+| `p_city=los_angeles` | Chrome, Firefox | Target a city; combine with `p_cc` or `p_state` |
+| `p_state=texas` | Chrome, Firefox | Target a US state; takes priority over `p_cc` |
+| `p_device=mobile` | Chrome | Emulate `desktop`, `mobile`, or `tablet` device fingerprints |
+| `o_vnc=true` | Chrome, Firefox | Enable Session Inspection for visual debugging |
+| `o_pw=1.56` | Firefox | Select supported Firefox Playwright version `1.51` or `1.56` |
+| `bargs=disable-notifications` | Chrome | Pass supported Chrome browser arguments |
 
 ## When to Use
 

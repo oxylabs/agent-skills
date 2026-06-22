@@ -243,9 +243,9 @@ const password = process.env.OXY_UNBLOCKER_PASSWORD;
 })();
 ```
 
-## Firefox Browser (Stealth Mode)
+## Firefox Browser (Legacy)
 
-For sites with advanced anti-bot detection, use Firefox:
+When Chrome has lower success on a target, try the Firefox endpoint:
 
 **Playwright with Firefox:**
 ```python
@@ -255,14 +255,12 @@ import os
 username = os.environ["OXY_UNBLOCKER_USERNAME"]
 password = os.environ["OXY_UNBLOCKER_PASSWORD"]
 
-# Firefox endpoint (check docs for exact URL format)
-browser_url = f"wss://{username}:{password}@ubc.oxylabs.io"
+browser_url = f"wss://{username}:{password}@ubs.oxylabs.io?o_pw=1.56"
 
 with sync_playwright() as p:
-    # Connect to Firefox for stealth mode
-    browser = p.firefox.connect_over_cdp(browser_url)
+    browser = p.firefox.connect(browser_url, timeout=60000)
     page = browser.new_page()
-    page.goto("https://protected-site.com")
+    page.goto("https://example.com")
     print(page.content())
     browser.close()
 ```
