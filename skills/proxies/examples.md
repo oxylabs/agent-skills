@@ -90,35 +90,35 @@ print(s.get("https://ip.oxylabs.io/location").text)
 
 **Residential proxy:**
 ```bash
-curl -x "http://pr.oxylabs.io:7777" \
+curl -x "pr.oxylabs.io:7777" \
   -U "customer-$OXY_RES_USERNAME:$OXY_RES_PASSWORD" \
   "https://ip.oxylabs.io/location"
 ```
 
 **With geo-targeting:**
 ```bash
-curl -x "http://pr.oxylabs.io:7777" \
+curl -x "pr.oxylabs.io:7777" \
   -U "customer-$OXY_RES_USERNAME-cc-US-city-los_angeles:$OXY_RES_PASSWORD" \
   "https://ip.oxylabs.io/location"
 ```
 
 **With sticky session:**
 ```bash
-curl -x "http://pr.oxylabs.io:7777" \
+curl -x "pr.oxylabs.io:7777" \
   -U "customer-$OXY_RES_USERNAME-cc-DE-sessid-session123:$OXY_RES_PASSWORD" \
   "https://example.com"
 ```
 
 **Datacenter proxy:**
 ```bash
-curl -x "http://dc.oxylabs.io:8000" \
+curl -x "dc.oxylabs.io:8000" \
   -U "user-$OXY_DC_USERNAME:$OXY_DC_PASSWORD" \
   "https://ip.oxylabs.io/location"
 ```
 
 **ISP proxy:**
 ```bash
-curl -x "http://isp.oxylabs.io:8001" \
+curl -x "isp.oxylabs.io:8001" \
   -U "user-$OXY_DC_USERNAME:$OXY_DC_PASSWORD" \
   "https://ip.oxylabs.io/location"
 ```
