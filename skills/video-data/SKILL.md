@@ -24,7 +24,8 @@ Uses the same endpoint as Web Scraper API with YouTube-specific sources.
 ### Endpoint
 
 ```
-POST https://realtime.oxylabs.io/v1/queries
+POST https://realtime.oxylabs.io/v1/queries   # immediate metadata/search/transcript responses
+POST https://data.oxylabs.io/v1/queries       # Push-Pull downloads, callbacks, storage
 Content-Type: application/json
 ```
 
@@ -38,11 +39,32 @@ curl -u "$OXY_WSA_USERNAME:$OXY_WSA_PASSWORD" ...
 
 | Source | Description |
 |--------|-------------|
-| `youtube_search` | Search results (videos, channels, playlists) |
+| `youtube_search` | Search results up to 20 items (videos, channels, playlists) |
+| `youtube_search_max` | Search results up to 700 items |
 | `youtube_metadata` | Video metadata (title, views, likes, description) |
 | `youtube_transcript` | Video transcripts |
 | `youtube_subtitles` | Closed captions/subtitles |
 | `youtube_channel` | Channel data and video lists |
+| `youtube_autocomplete` | Keyword suggestions |
+| `youtube_video_trainability` | AI training permission status |
+| `youtube_download` | Push-Pull video/audio download to cloud storage |
+
+### Source Parameters
+
+| Source | Required | Common optional parameters |
+|--------|----------|----------------------------|
+| `youtube_search`, `youtube_search_max` | `query` | `upload_date`, `type`, `duration`, `sort_by`, `360`, `3d`, `4k`, `creative_commons`, `hd`, `hdr`, `live`, `location`, `purchased`, `subtitles`, `vr180` |
+| `youtube_metadata` | `query`, `parse: true` | `callback_url`; do not use `render` |
+| `youtube_channel` | `channel_handle`, `parse: true` | `limit`, `callback_url` |
+| `youtube_transcript` | `query`, `context.language_code` | `context.transcript_origin`: `auto_generated` or `uploader_provided`; `callback_url` |
+| `youtube_subtitles` | `query`, `context.language_code` | `context.subtitle_origin`: `auto_generated` or `uploader_provided`; `callback_url` |
+| `youtube_autocomplete` | `query` | `location` country code, `language`, `callback_url` |
+| `youtube_video_trainability` | `video_id` | `callback_url` |
+| `youtube_download` | `query`, `storage_type`, `storage_url` | `callback_url`, `context.download_type`, `context.video_quality`, `context.start_at`, `context.end_at` |
+
+For `youtube_download`, use Push-Pull and cloud storage. `storage_type` is `gcs`, `s3`, or `s3_compatible`; `download_type` is `audio`, `video`, or `audio_video`; `video_quality` is `best`, `worst`, or `144`, `360`, `480`, `720`, `1080`, `1440`, `2160`, `4320`.
+
+Downloads default to 720p when available and are limited to 1 hour. `start_at`/`end_at` use `hh:mm:ss`; `end_at` must be later than `start_at`. For batch downloads, use `/v1/queries/batch` with a `query` array only; keep all other parameters singular.
 
 ### Quick Start
 
@@ -53,7 +75,8 @@ curl -X POST 'https://realtime.oxylabs.io/v1/queries' \
   -H 'Content-Type: application/json' \
   -d '{
     "source": "youtube_metadata",
-    "query": "dQw4w9WgXcQ"
+    "query": "dQw4w9WgXcQ",
+    "parse": true
   }'
 ```
 
@@ -75,7 +98,10 @@ curl -X POST 'https://realtime.oxylabs.io/v1/queries' \
   -H 'Content-Type: application/json' \
   -d '{
     "source": "youtube_transcript",
-    "query": "dQw4w9WgXcQ"
+    "query": "dQw4w9WgXcQ",
+    "context": [
+      {"key": "language_code", "value": "en"}
+    ]
   }'
 ```
 
@@ -86,7 +112,9 @@ curl -X POST 'https://realtime.oxylabs.io/v1/queries' \
   -H 'Content-Type: application/json' \
   -d '{
     "source": "youtube_channel",
-    "query": "@channelhandle"
+    "channel_handle": "@channelhandle",
+    "parse": true,
+    "limit": 10
   }'
 ```
 
@@ -103,6 +131,8 @@ Contact Oxylabs sales team to get a dedicated high-bandwidth endpoint.
 **Default configuration:**
 - Port: `60000`
 - Endpoint: Provided after purchase
+
+Use `OXY_HB_ENDPOINT`; if absent, check `OXYLABS_HB_ENDPOINT`.
 
 ### Connection Test
 

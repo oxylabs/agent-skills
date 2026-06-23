@@ -12,6 +12,18 @@ Official agent skills for Oxylabs products. Each skill provides structured instr
 | Headless Browser | [`skills/headless-browser`](skills/headless-browser/SKILL.md) | Remote headless browsers via CDP (Playwright/Puppeteer) with built-in request handling and residential proxies |
 | Video Data | [`skills/video-data`](skills/video-data/SKILL.md) | Video data extraction (metadata, transcripts, search, channels) and high-bandwidth proxy video downloads |
 
+## Product Routing
+
+| Need | Use |
+|------|-----|
+| Bring your own HTTP client, proxy auth, IP rotation, sticky sessions, or raw geo-targeted proxy traffic | Proxies |
+| Fetch protected pages without browser interactions | Web Unblocker |
+| Get structured data from supported targets, search results, e-commerce pages, or parsed JSON | Web Scraper API |
+| Clicks, forms, screenshots, browser state, or Playwright/Puppeteer automation | Headless Browser |
+| YouTube metadata, transcripts, search, channel data, or video/audio downloads | Video Data |
+
+Start with the most specific product that fits the task. Validate one small request first, confirm auth, status, and expected output, then scale with explicit limits.
+
 ## Installation
 
 ### Claude Code (plugin marketplace)
@@ -41,8 +53,10 @@ All skills authenticate via environment variables defined in a `.env` file.
 
 | Variable | Used By | Description |
 |----------|---------|-------------|
-| `OXY_DC_USERNAME` | Proxies | Proxy service username |
-| `OXY_DC_PASSWORD` | Proxies | Proxy service password |
+| `OXY_RES_USERNAME` | Residential/Mobile Proxies | Residential or Mobile proxy username |
+| `OXY_RES_PASSWORD` | Residential/Mobile Proxies | Residential or Mobile proxy password |
+| `OXY_DC_USERNAME` | Datacenter/ISP Proxies | Datacenter or ISP proxy username |
+| `OXY_DC_PASSWORD` | Datacenter/ISP Proxies | Datacenter or ISP proxy password |
 | `OXYLABS_USERNAME` | Web Unblocker | Web Unblocker username |
 | `OXYLABS_PASSWORD` | Web Unblocker | Web Unblocker password |
 | `OXY_WSA_USERNAME` | Web Scraper API, Video Data | Web Scraper API username |

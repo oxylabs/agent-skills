@@ -1,5 +1,7 @@
 # Headless Browser Code Examples
 
+Examples prefer `OXY_UNBLOCKER_USERNAME` and `OXY_UNBLOCKER_PASSWORD`. `OXY_HB_USERNAME` and `OXY_HB_PASSWORD` are accepted aliases for older local setups.
+
 ## Playwright (Python)
 
 **Basic usage:**
@@ -243,9 +245,9 @@ const password = process.env.OXY_UNBLOCKER_PASSWORD;
 })();
 ```
 
-## Firefox Browser (Stealth Mode)
+## Firefox Browser (Legacy)
 
-For sites with advanced anti-bot detection, use Firefox:
+Try Firefox when a target performs better outside Chrome. Use the `ubs.oxylabs.io` endpoint and Playwright 1.51 or 1.56.
 
 **Playwright with Firefox:**
 ```python
@@ -254,15 +256,13 @@ import os
 
 username = os.environ["OXY_UNBLOCKER_USERNAME"]
 password = os.environ["OXY_UNBLOCKER_PASSWORD"]
-
-# Firefox endpoint (check docs for exact URL format)
-browser_url = f"wss://{username}:{password}@ubc.oxylabs.io"
+endpoint = "ubs.oxylabs.io"
+browser_url = f"wss://{username}:{password}@{endpoint}?o_pw=1.56"
 
 with sync_playwright() as p:
-    # Connect to Firefox for stealth mode
-    browser = p.firefox.connect_over_cdp(browser_url)
+    browser = p.firefox.connect(browser_url, timeout=60000)
     page = browser.new_page()
-    page.goto("https://protected-site.com")
+    page.goto("https://example.com")
     print(page.content())
     browser.close()
 ```
@@ -275,6 +275,7 @@ import os
 
 username = os.environ["OXY_UNBLOCKER_USERNAME"]
 password = os.environ["OXY_UNBLOCKER_PASSWORD"]
+browser = None
 
 with sync_playwright() as p:
     try:

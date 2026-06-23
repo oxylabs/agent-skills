@@ -16,7 +16,8 @@ curl -u "$OXY_WSA_USERNAME:$OXY_WSA_PASSWORD" ...
 ## Endpoint
 
 ```
-POST https://realtime.oxylabs.io/v1/queries
+POST https://realtime.oxylabs.io/v1/queries   # immediate response
+POST https://data.oxylabs.io/v1/queries       # Push-Pull jobs, callbacks, storage
 Content-Type: application/json
 ```
 
@@ -29,7 +30,36 @@ Content-Type: application/json
 | `query` | Conditional | Search query or product ID (for `*_search` and `*_product` sources) |
 | `parse` | No | Enable structured data parsing (recommended for supported sources) |
 | `render` | No | JavaScript rendering: `html` or `png` |
-| `geo_location` | No | Geographic targeting (country, state, or ZIP code) |
+| `geo_location` | No | Geographic targeting: country/state/city, ZIP/postcode, coordinates, or Criteria ID where supported |
+| `session_id` | No | Reuse the same proxy IP across multiple jobs |
+| `content_encoding` | No | Set to `base64` when downloading image files via Realtime or Push-Pull |
+| `user_agent_type` | No | Device/browser preset, e.g., `desktop_chrome`, `mobile_ios`, `tablet_android` |
+| `locale` | No | Interface language / `Accept-Language`, e.g., `de-DE` |
+| `callback_url` | No | Push-Pull callback endpoint |
+| `storage_type`, `storage_url` | No | Push-Pull cloud upload target (`gcs`, `s3`, `tos`, `s3_compatible`) |
+| `markdown`, `xhr` | No | Enable markdown or captured XHR result types |
+| `browser_instructions` | No | Rendered browser actions; requires `render: "html"` |
+| `parsing_instructions`, `parser_preset` | No | Custom parser rules or saved preset; pair with `parse: true` |
+| `client_notes` | No | Client-side job tag saved with the job metadata |
+| `domain`, `subdomain`, `start_page`, `pages`, `limit`, `store_id`, `delivery_zip`, `fulfillment_type` | Source-specific | Marketplace/search/store localization and pagination fields |
+
+`user_agent_type` values: `desktop`, `desktop_chrome`, `desktop_edge`, `desktop_firefox`, `desktop_opera`, `desktop_safari`, `mobile`, `mobile_android`, `mobile_ios`, `tablet`, `tablet_android`, `tablet_ios`.
+
+## Context Parameters
+
+Add these as `{ "key": "...", "value": ... }` objects in `context`:
+
+| Key | Use |
+|-----|-----|
+| `force_headers`, `headers` | Merge custom headers with managed headers |
+| `force_cookies`, `cookies` | Merge custom cookies with managed cookies |
+| `http_method`, `content` | Use `post` with Base64-encoded body content |
+| `follow_redirects` | Follow 3xx redirect chains |
+| `successful_status_codes` | Treat specific non-standard HTTP codes as successful |
+
+For multi-format output, enable types in the payload (`parse`, `markdown`, `xhr`, `render: "png"`) and request them with `?type=raw,parsed,png,markdown,xhr`.
+
+For batch Push-Pull jobs, use `POST /v1/queries/batch` with arrays only for `query` or `url`; keep all other parameters singular. Maximum batch size is 5,000 values.
 
 ## Quick Start
 
@@ -101,3 +131,5 @@ For detailed request/response examples including geo-location, JavaScript render
 - Use ZIP codes for US e-commerce geo-location (e.g., `"90210"`)
 - Use country/state format for search engines (e.g., `"California,United States"`)
 - Add `render: "html"` for JavaScript-heavy pages
+- Use `render: ""` only to disable automatic forced rendering for force-rendered pages; set client timeouts near 180 seconds for rendered Realtime or Proxy Endpoint requests
+- Add `content_encoding: "base64"` when scraping image URLs, then decode `results[0].content` before saving the file

@@ -94,14 +94,15 @@ Shares the residential endpoint but a separate IP pool. Carrier/ASN targeting av
 
 ---
 
-## Shared Datacenter Proxies
+## Datacenter Proxies
 
-High-speed rotating proxies from a shared datacenter pool.
+High-speed datacenter proxies with rotating and proxy-list access.
 
 | Property | Value |
 |----------|-------|
 | Host | `dc.oxylabs.io` |
-| Port | `8000` |
+| Rotation port | `8000` |
+| Assigned/static ports | `8001` and up |
 | Auth prefix | `user-` |
 
 **Best for:** high-volume scraping, cost-sensitive jobs, non-protected targets.
@@ -124,14 +125,15 @@ Full reference: [dedicated-datacenter.md](dedicated-datacenter.md)
 
 ---
 
-## Shared ISP Proxies
+## ISP Proxies
 
-Rotating ISP-registered IPs from a shared pool.
+ISP-registered proxies with rotating and proxy-list access.
 
 | Property | Value |
 |----------|-------|
 | Host | `isp.oxylabs.io` |
-| Port | `8001` |
+| Rotation port | `8000` |
+| Assigned/static ports | `8001` and up |
 | Auth prefix | `user-` |
 
 **Best for:** e-commerce, SEO monitoring, brand protection where shared rotation is acceptable.

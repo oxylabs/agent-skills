@@ -44,11 +44,13 @@ curl -k -x "https://unblock.oxylabs.io:60000" \
 
 | Header | Description |
 |--------|-------------|
-| `x-oxylabs-render` | `html` for rendered HTML, `png` for screenshot |
+| `x-oxylabs-render` | `html` for rendered HTML, `png` for raw PNG bytes; empty value disables automatic forced rendering |
 | `X-Oxylabs-Session-Id` | Reuse same IP across requests (any random string) |
-| `X-Oxylabs-Geo-Location` | Target country (e.g., `Germany`, `United States`) |
+| `X-Oxylabs-Geo-Location` | Target country, city/state, ZIP/postcode, or coordinates |
 | `x-oxylabs-force-headers: 1` | Enable custom header passthrough |
+| `x-oxylabs-force-cookies: 1` | Enable custom cookie passthrough |
 | `X-Oxylabs-Successful-Status-Codes` | Define custom success codes to prevent retries |
+| `x-oxylabs-browser-instructions` | JSON-escaped browser actions; requires `x-oxylabs-render: html` |
 
 ## Session Persistence
 
@@ -70,6 +72,10 @@ curl -k -x "https://unblock.oxylabs.io:60000" \
   "https://example.com"
 ```
 
+Use values such as `Germany`, `90210`, `California,United States`, `New York,New York,United States`, or `lat: 40.7128, lng: -74.0060, rad: 50`.
+
+Use normal HTTP methods and request bodies through the proxy; Web Unblocker supports both GET and POST.
+
 ## When to Use Web Unblocker vs Regular Proxies
 
 | Scenario | Use |
@@ -83,7 +89,9 @@ curl -k -x "https://unblock.oxylabs.io:60000" \
 ## Key Guidelines
 
 - Always use `-k` flag (or disable SSL verification) - the proxy uses its own certificates
-- Add `x-oxylabs-render: html` if experiencing empty content or low success rates
+- Add `x-oxylabs-render: html` if experiencing empty content or low success rates; set client timeouts near 180 seconds for rendered requests
+- Check `X-Oxylabs-Final-Url` in response headers when redirects matter
 - Avoid adding custom unblocking headers that may interfere with the AI
+- Browser instruction header values must be JSON-escaped and compact; pair them with `x-oxylabs-render: html`
 
 For code examples in Python, Node.js, PHP, Go, Java, and C#, see [examples.md](examples.md).

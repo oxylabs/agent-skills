@@ -1,6 +1,6 @@
 # Dedicated ISP Proxies
 
-ISP-registered dedicated IPs assigned to your account. Access via gateway `disp.oxylabs.io` (Self-Service) or direct IPs (Enterprise). Distinct from shared rotating pool at `isp.oxylabs.io:8001`.
+ISP-registered dedicated IPs assigned to your account. Access via gateway `disp.oxylabs.io` (Self-Service) or direct IPs (Enterprise). Distinct from ISP Proxies at `isp.oxylabs.io`.
 
 Higher trust than datacenter; ASN/ISP chosen at purchase and locked for rotation.
 

@@ -232,7 +232,7 @@ import uuid
 
 username = os.environ["OXY_WSA_USERNAME"]
 password = os.environ["OXY_WSA_PASSWORD"]
-endpoint = os.environ["OXYLABS_HB_ENDPOINT"]
+endpoint = os.environ["OXY_HB_ENDPOINT"]
 session_id = str(uuid.uuid4()).replace("-", "")
 
 ydl_opts = {
@@ -253,7 +253,7 @@ import uuid
 
 username = os.environ["OXY_WSA_USERNAME"]
 password = os.environ["OXY_WSA_PASSWORD"]
-endpoint = os.environ["OXYLABS_HB_ENDPOINT"]
+endpoint = os.environ["OXY_HB_ENDPOINT"]
 session_id = str(uuid.uuid4()).replace("-", "")
 
 ydl_opts = {
@@ -313,7 +313,7 @@ import uuid
 
 username = os.environ["OXY_WSA_USERNAME"]
 password = os.environ["OXY_WSA_PASSWORD"]
-endpoint = os.environ["OXYLABS_HB_ENDPOINT"]
+endpoint = os.environ["OXY_HB_ENDPOINT"]
 session_id = str(uuid.uuid4()).replace("-", "")
 
 ydl_opts = {
