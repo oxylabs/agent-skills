@@ -16,12 +16,21 @@ description: >-
 |------|------|------|----------|
 | Residential | `pr.oxylabs.io` | `7777` | High anonymity, geo-targeting |
 | Mobile | `pr.oxylabs.io` | `7777` | Mobile-specific content, highest trust |
-| Datacenter (shared) | `dc.oxylabs.io` | `8000` | Speed, high volume |
-| ISP (shared) | `isp.oxylabs.io` | `8001` | Speed + anonymity balance |
-| Dedicated Datacenter | `ddc.oxylabs.io` | `8001+` / `8000` | Owned IPs, port-based access |
-| Dedicated ISP | `disp.oxylabs.io` | `8001+` / `8000` | Owned ISP IPs, ASN locked |
+| Datacenter (shared) | `dc.oxylabs.io` | `8000` rotation / `8001+` sticky | Speed, high volume |
+| ISP (shared) | `isp.oxylabs.io` | `8000` rotation / `8001+` sticky | Speed + anonymity balance |
+| Dedicated Datacenter | `ddc.oxylabs.io` | `8000` rotation / `8001+` sticky | Owned IPs, port-based access |
+| Dedicated ISP | `disp.oxylabs.io` | `8000` rotation / `8001+` sticky | Owned ISP IPs, ASN locked |
 
 Shared proxies rotate from a pool. Dedicated proxies use your purchased IPs — see [dedicated-datacenter.md](dedicated-datacenter.md) or [dedicated-isp.md](dedicated-isp.md).
+
+## Environment Variables
+
+Use credentials for the specific proxy product family:
+
+| Product family | Variables | Username prefix |
+|----------------|-----------|-----------------|
+| Residential, Mobile | `OXY_RES_USERNAME`, `OXY_RES_PASSWORD` | `customer-` |
+| Datacenter, ISP, Dedicated Datacenter, Dedicated ISP | `OXY_DC_USERNAME`, `OXY_DC_PASSWORD` | `user-` for self-service/shared |
 
 ## Authentication Format
 
@@ -42,7 +51,7 @@ customer-USERNAME-cc-US-city-new_york-sessid-abc123:PASSWORD
 **Residential/Mobile proxy:**
 ```bash
 curl -x "http://pr.oxylabs.io:7777" \
-  -U "customer-$OXY_DC_USERNAME:$OXY_DC_PASSWORD" \
+  -U "customer-$OXY_RES_USERNAME:$OXY_RES_PASSWORD" \
   "https://ip.oxylabs.io/location"
 ```
 
@@ -62,7 +71,7 @@ curl -x "http://isp.oxylabs.io:8001" \
 
 ## Geo-Targeting Parameters
 
-Append to username with hyphens:
+For Residential/Mobile, append parameters to the username with hyphens:
 
 | Parameter | Format | Example |
 |-----------|--------|---------|
@@ -73,28 +82,30 @@ Append to username with hyphens:
 **Example with geo-targeting:**
 ```bash
 curl -x "http://pr.oxylabs.io:7777" \
-  -U "customer-$OXY_DC_USERNAME-cc-US-city-new_york:$OXY_DC_PASSWORD" \
+  -U "customer-$OXY_RES_USERNAME-cc-US-city-new_york:$OXY_RES_PASSWORD" \
   "https://ip.oxylabs.io/location"
 ```
+
+For Shared Datacenter/ISP country rotation, use `-country-US` with `user-` credentials on the rotation port.
 
 ## Session Control
 
 | Parameter | Description | Max Duration |
 |-----------|-------------|--------------|
-| `sessid` | Keep same IP across requests | 10 minutes (auto-expires) |
-| `sesstime` | Maintain IP for specified minutes | 30 minutes |
+| `sessid` | Keep same IP across requests | 10 min default; ends after 60s inactivity |
+| `sesstime` | Extend a `sessid` window | 5-1440 min (24 h) |
 
 **Sticky session example:**
 ```bash
 curl -x "http://pr.oxylabs.io:7777" \
-  -U "customer-$OXY_DC_USERNAME-cc-US-sessid-mysession123:$OXY_DC_PASSWORD" \
+  -U "customer-$OXY_RES_USERNAME-cc-US-sessid-mysession123:$OXY_RES_PASSWORD" \
   "https://example.com"
 ```
 
 **Timed session (5 minutes):**
 ```bash
 curl -x "http://pr.oxylabs.io:7777" \
-  -U "customer-$OXY_DC_USERNAME-sessid-abc123-sesstime-5:$OXY_DC_PASSWORD" \
+  -U "customer-$OXY_RES_USERNAME-sessid-abc123-sesstime-5:$OXY_RES_PASSWORD" \
   "https://example.com"
 ```
 

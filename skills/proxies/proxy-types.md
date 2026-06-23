@@ -101,7 +101,8 @@ High-speed rotating proxies from a shared datacenter pool.
 | Property | Value |
 |----------|-------|
 | Host | `dc.oxylabs.io` |
-| Port | `8000` |
+| Rotation port | `8000` |
+| Sticky/static ports | `8001` and up |
 | Auth prefix | `user-` |
 
 **Best for:** high-volume scraping, cost-sensitive jobs, non-protected targets.
@@ -131,7 +132,8 @@ Rotating ISP-registered IPs from a shared pool.
 | Property | Value |
 |----------|-------|
 | Host | `isp.oxylabs.io` |
-| Port | `8001` |
+| Rotation port | `8000` |
+| Sticky/static ports | `8001` and up |
 | Auth prefix | `user-` |
 
 **Best for:** e-commerce, SEO monitoring, brand protection where shared rotation is acceptable.

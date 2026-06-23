@@ -1,6 +1,7 @@
 # Proxy Code Examples
 
-Environment variables used throughout: `OXY_DC_USERNAME`, `OXY_DC_PASSWORD`.
+Residential/Mobile examples use `OXY_RES_USERNAME`, `OXY_RES_PASSWORD`.
+Datacenter, ISP, and dedicated examples use `OXY_DC_USERNAME`, `OXY_DC_PASSWORD`.
 
 ## Dedicated Datacenter (Self-Service)
 
@@ -90,21 +91,21 @@ print(s.get("https://ip.oxylabs.io/location").text)
 **Residential proxy:**
 ```bash
 curl -x "http://pr.oxylabs.io:7777" \
-  -U "customer-$OXY_DC_USERNAME:$OXY_DC_PASSWORD" \
+  -U "customer-$OXY_RES_USERNAME:$OXY_RES_PASSWORD" \
   "https://ip.oxylabs.io/location"
 ```
 
 **With geo-targeting:**
 ```bash
 curl -x "http://pr.oxylabs.io:7777" \
-  -U "customer-$OXY_DC_USERNAME-cc-US-city-los_angeles:$OXY_DC_PASSWORD" \
+  -U "customer-$OXY_RES_USERNAME-cc-US-city-los_angeles:$OXY_RES_PASSWORD" \
   "https://ip.oxylabs.io/location"
 ```
 
 **With sticky session:**
 ```bash
 curl -x "http://pr.oxylabs.io:7777" \
-  -U "customer-$OXY_DC_USERNAME-cc-DE-sessid-session123:$OXY_DC_PASSWORD" \
+  -U "customer-$OXY_RES_USERNAME-cc-DE-sessid-session123:$OXY_RES_PASSWORD" \
   "https://example.com"
 ```
 
@@ -129,8 +130,8 @@ curl -x "http://isp.oxylabs.io:8001" \
 import requests
 import os
 
-username = os.environ["OXY_DC_USERNAME"]
-password = os.environ["OXY_DC_PASSWORD"]
+username = os.environ["OXY_RES_USERNAME"]
+password = os.environ["OXY_RES_PASSWORD"]
 
 proxies = {
     "http": f"http://customer-{username}:{password}@pr.oxylabs.io:7777",
@@ -146,8 +147,8 @@ print(response.json())
 import requests
 import os
 
-username = os.environ["OXY_DC_USERNAME"]
-password = os.environ["OXY_DC_PASSWORD"]
+username = os.environ["OXY_RES_USERNAME"]
+password = os.environ["OXY_RES_PASSWORD"]
 
 # US, New York, sticky session
 proxy_user = f"customer-{username}-cc-US-city-new_york-sessid-abc123"
@@ -184,8 +185,8 @@ print(response.json())
 ```javascript
 const axios = require("axios");
 
-const username = process.env.OXY_DC_USERNAME;
-const password = process.env.OXY_DC_PASSWORD;
+const username = process.env.OXY_RES_USERNAME;
+const password = process.env.OXY_RES_PASSWORD;
 
 const proxy = {
   host: "pr.oxylabs.io",
@@ -205,8 +206,8 @@ axios.get("https://ip.oxylabs.io/location", { proxy })
 ```javascript
 const axios = require("axios");
 
-const username = process.env.OXY_DC_USERNAME;
-const password = process.env.OXY_DC_PASSWORD;
+const username = process.env.OXY_RES_USERNAME;
+const password = process.env.OXY_RES_PASSWORD;
 
 const proxy = {
   host: "pr.oxylabs.io",
@@ -226,8 +227,8 @@ axios.get("https://example.com", { proxy })
 **Residential proxy:**
 ```php
 <?php
-$username = getenv('OXY_DC_USERNAME');
-$password = getenv('OXY_DC_PASSWORD');
+$username = getenv('OXY_RES_USERNAME');
+$password = getenv('OXY_RES_PASSWORD');
 
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, "https://ip.oxylabs.io/location");
@@ -245,8 +246,8 @@ echo $response;
 **With geo-targeting:**
 ```php
 <?php
-$username = getenv('OXY_DC_USERNAME');
-$password = getenv('OXY_DC_PASSWORD');
+$username = getenv('OXY_RES_USERNAME');
+$password = getenv('OXY_RES_PASSWORD');
 
 $proxyUser = "customer-$username-cc-US-city-chicago-sessid-mysession";
 
@@ -277,8 +278,8 @@ import (
 )
 
 func main() {
-    username := os.Getenv("OXY_DC_USERNAME")
-    password := os.Getenv("OXY_DC_PASSWORD")
+    username := os.Getenv("OXY_RES_USERNAME")
+    password := os.Getenv("OXY_RES_PASSWORD")
 
     proxyURL, _ := url.Parse(fmt.Sprintf(
         "http://customer-%s:%s@pr.oxylabs.io:7777",
@@ -305,8 +306,8 @@ import java.io.*;
 
 public class OxylabsProxy {
     public static void main(String[] args) throws Exception {
-        String username = System.getenv("OXY_DC_USERNAME");
-        String password = System.getenv("OXY_DC_PASSWORD");
+        String username = System.getenv("OXY_RES_USERNAME");
+        String password = System.getenv("OXY_RES_PASSWORD");
 
         Proxy proxy = new Proxy(Proxy.Type.HTTP,
             new InetSocketAddress("pr.oxylabs.io", 7777));
@@ -340,8 +341,8 @@ public class OxylabsProxy {
 require 'net/http'
 require 'uri'
 
-username = ENV['OXY_DC_USERNAME']
-password = ENV['OXY_DC_PASSWORD']
+username = ENV['OXY_RES_USERNAME']
+password = ENV['OXY_RES_PASSWORD']
 
 proxy_host = 'pr.oxylabs.io'
 proxy_port = 7777
