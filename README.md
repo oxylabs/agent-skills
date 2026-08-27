@@ -13,11 +13,13 @@ Official agent skills for Oxylabs products. Each skill provides structured instr
 | Web Scraper API | [`skills/web-scraper-api`](skills/web-scraper-api/SKILL.md) | Production-grade web scraping with structured JSON parsing for 40+ targets and geo-targeting |
 | Headless Browser | [`skills/headless-browser`](skills/headless-browser/SKILL.md) | Remote headless browsers via CDP (Playwright/Puppeteer) with built-in request handling and residential proxies |
 | Video Data | [`skills/video-data`](skills/video-data/SKILL.md) | Video data extraction (metadata, subtitles, search, channels) and high-bandwidth proxy video downloads |
+| HOL Guard | [`skills/hol-guard`](skills/hol-guard/SKILL.md) | Local agent-runtime protection before credential-bearing, cost-bearing, or state-changing Oxylabs workflows |
 
 ## Product Routing
 
 | Need | Use |
 |------|-----|
+| Protect the local AI harness before credential-bearing, cost-bearing, or state-changing Oxylabs work | HOL Guard first, then the most specific Oxylabs skill below |
 | Bring your own HTTP client, proxy auth, IP rotation, sticky sessions, or raw geo-targeted proxy traffic | Proxies |
 | Fetch protected pages without browser interactions | Web Unblocker |
 | Get structured data from supported targets, search results, e-commerce pages, or parsed JSON | Web Scraper API |
@@ -38,7 +40,7 @@ Inside Claude Code, run:
 /plugin install oxylabs@oxylabs-agent-skills
 ```
 
-This installs all 5 skills as a single plugin. To update later:
+This installs all 6 skills as a single plugin. To update later:
 
 ```
 /plugin marketplace update oxylabs-agent-skills
@@ -52,7 +54,7 @@ npx skills add https://github.com/oxylabs/agent-skills.git
 
 ## Configuration
 
-All skills authenticate via environment variables defined in a `.env` file.
+All Oxylabs product skills authenticate via environment variables defined in a `.env` file.
 
 | Variable | Used By | Description |
 |----------|---------|-------------|
