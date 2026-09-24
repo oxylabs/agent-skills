@@ -73,6 +73,19 @@ curl -x "isp.oxylabs.io:8001" \
 
 For Datacenter, ISP, Dedicated Datacenter, and Dedicated ISP proxies, use dashboard proxy-list ports starting at `8001` for assigned/static IPs; the first listed IP uses `8001`. Switch to port `8000` only when the task calls for automatic rotation.
 
+## Protocols (Residential)
+
+| Protocol|	Transport|	Entry point|	Use when|
+|---------|----------|-----------|----------|
+|HTTP|	TCP|	pr.oxylabs.io:7777|	Default. Supported by common libraries and third-party software|
+|HTTPS|	TCP|	https://pr.oxylabs.io:7777|	Fully encrypted connection to the proxy|
+|SOCKS5|	TCP and UDP|	socks5h://pr.oxylabs.io:7777|	Client requires SOCKS5|
+|HTTP/3| (MASQUE)	UDP (QUIC)|	masque.oxylabs.io:50000|	Native HTTP/3, UDP, DNS over UDP, WebRTC/SIP/gaming traffic|
+
+If the task only needs standard HTTP or HTTPS (TCP) requests, use the main endpoint pr.oxylabs.io:7777. MASQUE adds QUIC connection setup overhead and is only worth it when UDP or native HTTP/3 transport is required.
+
+Google is a restricted target over UDP connections (applies to MASQUE and SOCKS5 UDP).
+
 ## Geo-Targeting Parameters
 
 For Residential/Mobile, append username parameters with hyphens unless noted:
