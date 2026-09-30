@@ -11,7 +11,7 @@ Official agent skills for Oxylabs products. Each skill provides structured instr
 | Proxies | [`skills/proxies`](skills/proxies/SKILL.md) | Residential, Mobile, Datacenter, Dedicated Datacenter, ISP and Dedicated ISP proxy network with geo-targeting, IP rotation, and session persistence |
 | Web Unblocker | [`skills/web-unblocker`](skills/web-unblocker/SKILL.md) | AI-powered proxy that handles fingerprinting, JavaScript rendering, CAPTCHAs, and improves access reliability automatically |
 | Web Scraper API | [`skills/web-scraper-api`](skills/web-scraper-api/SKILL.md) | Production-grade web scraping with structured JSON parsing for 40+ targets and geo-targeting |
-| Agent Browser | [`skills/headless-browser`](skills/headless-browser/SKILL.md) | Remote agent browsers via CDP (Playwright/Puppeteer) with built-in request handling and residential proxies |
+| Agent Browser | [`skills/agent-browser`](skills/agent-browser/SKILL.md) | Remote agent browsers via CDP (Playwright/Puppeteer) with built-in request handling and residential proxies |
 | Video Data | [`skills/video-data`](skills/video-data/SKILL.md) | Video data extraction (metadata, subtitles, search, channels) and high-bandwidth proxy video downloads |
 
 ## Product Routing
