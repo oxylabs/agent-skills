@@ -22,13 +22,16 @@
     "playwright",
     "puppeteer",
     "youtube",
-    "anti-bot"
+    "anti-bot",
+    "security",
+    "hol-guard"
   ],
   "skills": [
     "./skills/headless-browser",
     "./skills/proxies",
     "./skills/video-data",
     "./skills/web-scraper-api",
-    "./skills/web-unblocker"
+    "./skills/web-unblocker",
+    "./skills/hol-guard"
   ]
 }
