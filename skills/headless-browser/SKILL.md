@@ -1,9 +1,9 @@
 ---
-name: headless-browser
-description: Connects to Oxylabs remote headless browsers over the Chrome DevTools Protocol (CDP) with Playwright or Puppeteer. Built-in anti-detection, residential proxies, geo-targeting, persistent sessions and profiles, session recording and live VNC inspection for debugging. Use instead of WebFetch or a local browser whenever a site renders with JavaScript, blocks bots (DataDome, Cloudflare, Akamai), needs a real browser session, screenshots or PDFs. Covers connection, retries, error recovery and safe scraping of protected targets without any human help.
+name: agent-browser
+description: Connects to Oxylabs remote agent browsers over the Chrome DevTools Protocol (CDP) with Playwright or Puppeteer. Built-in anti-detection, residential proxies, geo-targeting, persistent sessions and profiles, session recording and live VNC inspection for debugging. Use instead of WebFetch or a local browser whenever a site renders with JavaScript, blocks bots (DataDome, Cloudflare, Akamai), needs a real browser session, screenshots or PDFs. Covers connection, retries, error recovery and safe scraping of protected targets without any human help.
 ---
 
-# Oxylabs Headless Browser
+# Oxylabs Agent Browser
 
 Remote Chrome sessions with anti-detection, proxy rotation and geo-targeting built in.
 Nothing runs locally: you connect over a WebSocket, drive the browser with the CDP library you already
