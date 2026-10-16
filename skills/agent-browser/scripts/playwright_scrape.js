@@ -1,7 +1,7 @@
 const { chromium } = require("playwright");
 
-const USERNAME = process.env.OXY_HB_USERNAME;
-const PASSWORD = process.env.OXY_HB_PASSWORD;
+const USERNAME = process.env.OXY_AB_USERNAME;
+const PASSWORD = process.env.OXY_AB_PASSWORD;
 const ENDPOINT = "hb.oxylabs.io";
 
 // Connection parameters (parameters.md). Most jobs need only p_cc plus an explicit page_handler=false: every session

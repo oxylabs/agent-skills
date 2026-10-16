@@ -1,6 +1,6 @@
 # Examples
 
-All examples read `OXY_HB_USERNAME` / `OXY_HB_PASSWORD` and connect to `wss://USERNAME:PASSWORD@hb.oxylabs.io`. The `endpointUrl`, `connectWithBackoff`,
+All examples read `OXY_AB_USERNAME` / `OXY_AB_PASSWORD` and connect to `wss://USERNAME:PASSWORD@hb.oxylabs.io`. The `endpointUrl`, `connectWithBackoff`,
 `blockHeavyResources`, `watchOxylabsErrors`, `watchPageStatus`, `waitForPageStatus` and `scrape` helpers are the ones from
 `scripts/playwright_scrape.js`. Challenge handling snippets (page status listeners for every client, manual trigger,
 retry on error, profile setup with a challenge) are in `challenges.md`.
@@ -10,8 +10,8 @@ retry on error, profile setup with a challenge) are in `challenges.md`.
 ```javascript
 const puppeteer = require("puppeteer");
 
-const USERNAME = process.env.OXY_HB_USERNAME;
-const PASSWORD = process.env.OXY_HB_PASSWORD;
+const USERNAME = process.env.OXY_AB_USERNAME;
+const PASSWORD = process.env.OXY_AB_PASSWORD;
 // Same policy as scripts/playwright_scrape.js: Puppeteer reports "Unexpected server response: <status>" without the body.
 const RETRYABLE =
   /\b(429|50[0234]) [A-Z]|response: (429|50[0234])\b|CDP_SESSION_IN_USE|CDP_NO_BROWSERS_AVAILABLE|CDP_BROWSER_OVERWORKED|CDP_BAD_PROXY|CDP_GENERAL_ERROR|[Tt]imeout|ECONNRESET/;
@@ -57,8 +57,8 @@ async function connect(params, attempts = 6) {
 import asyncio, os, random, re
 from playwright.async_api import async_playwright
 
-USERNAME = os.environ["OXY_HB_USERNAME"]
-PASSWORD = os.environ["OXY_HB_PASSWORD"]
+USERNAME = os.environ["OXY_AB_USERNAME"]
+PASSWORD = os.environ["OXY_AB_PASSWORD"]
 RETRYABLE = re.compile(  # same policy as scripts/playwright_scrape.py
     r"\b(429|50[0234]) [A-Z]|response: (429|50[0234])\b|CDP_SESSION_IN_USE|CDP_NO_BROWSERS_AVAILABLE|"
     r"CDP_BROWSER_OVERWORKED|CDP_BAD_PROXY|CDP_GENERAL_ERROR|[Tt]imeout|ECONNRESET")
@@ -104,8 +104,8 @@ service reports as `401 missing auth header`. Build the header yourself. The ser
 URL-safe base64 alphabet and requires exactly one `:` in the decoded value.
 
 ```javascript
-const USERNAME = process.env.OXY_HB_USERNAME;
-const PASSWORD = process.env.OXY_HB_PASSWORD;
+const USERNAME = process.env.OXY_AB_USERNAME;
+const PASSWORD = process.env.OXY_AB_PASSWORD;
 
 if (PASSWORD.includes(":")) throw new Error("password may not contain ':' for Basic auth");
 const token = Buffer.from(`${USERNAME}:${PASSWORD}`).toString("base64");

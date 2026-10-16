@@ -1,8 +1,8 @@
 import os, random, re, time
 from playwright.sync_api import TimeoutError as PlaywrightTimeout, sync_playwright
 
-USERNAME = os.environ["OXY_HB_USERNAME"]
-PASSWORD = os.environ["OXY_HB_PASSWORD"]
+USERNAME = os.environ["OXY_AB_USERNAME"]
+PASSWORD = os.environ["OXY_AB_PASSWORD"]
 ENDPOINT = "hb.oxylabs.io"
 
 # Connection parameters (parameters.md). Most jobs need only p_cc plus an explicit page_handler=false: every session

@@ -15,7 +15,7 @@ use, and close the session when done. This file holds the rules; the detail live
 | Item | Value |
 |------|-------|
 | Endpoint | `wss://USERNAME:PASSWORD@hb.oxylabs.io` |
-| Credentials | `OXY_HB_USERNAME` / `OXY_HB_PASSWORD` |
+| Credentials | `OXY_AB_USERNAME` / `OXY_AB_PASSWORD` |
 | Options | URL query parameters only, e.g. `?p_cc=US&session_name=job-42` (see `parameters.md`) |
 | Browser engine | Default engine with the `oxyfp_win` browser profile; `p_src=oxybrowser` selects the new engine (see `parameters.md`) |
 | Libraries | Playwright `chromium.connectOverCDP` (recommended), Puppeteer `puppeteer.connect`, any CDP client |
@@ -37,7 +37,7 @@ Minimal shape (Playwright, JavaScript):
 
 ```javascript
 const { chromium } = require("playwright");
-const url = `wss://${process.env.OXY_HB_USERNAME}:${process.env.OXY_HB_PASSWORD}@hb.oxylabs.io?p_cc=US`;
+const url = `wss://${process.env.OXY_AB_USERNAME}:${process.env.OXY_AB_PASSWORD}@hb.oxylabs.io?p_cc=US`;
 const browser = await chromium.connectOverCDP(url, { timeout: 60000 });
 try {
   const page = await browser.contexts()[0].newPage(); // default context: backed by the device configuration, proxy, o_profile
