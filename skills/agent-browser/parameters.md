@@ -31,11 +31,18 @@ Most jobs need only `p_cc`. Sticky sessions, profiles and named sessions are opt
 | `proxy_resi_ses_id` | `^[a-zA-Z0-9][a-zA-Z0-9_]{2,35}$` | random per session | Opt-in. Sticky residential session: identical values on every connection keep the same exit IP. Disables automatic proxy retry (on `CDP_BAD_PROXY`, rotate the id). Residential only. `400 proxy_resi_ses_id must be 3–36 alphanumeric characters or underscores` |
 | `proxy_resi_ses_time` | integer 1 to 1440 (minutes) | none | How long the sticky IP is held, counted from the first connection that used the id. Residential only. `400 proxy_resi_ses_time must be between 1 and 1440` |
 
-## Fingerprint
+## Device
 
 | Parameter | Format | Default | Meaning and rules |
 |-----------|--------|---------|-------------------|
-| `p_device` | `desktop` / `mobile` | `desktop` | Device profile: viewport, touch APIs, platform headers, User-Agent and a matching residential pool. `tablet` is **not** accepted. Invalid value: `400 invalid_uri, invalid query: p_device must be one of [desktop mobile]`. Do not override viewport or device metrics yourself; the service ignores those CDP calls to keep the fingerprint coherent |
+| `p_device` | `desktop` / `mobile` | `desktop` | Device profile: viewport, touch APIs, platform headers, User-Agent and a matching residential pool. `tablet` is **not** accepted. Invalid value: `400 invalid_uri, invalid query: p_device must be one of [desktop mobile]`. Do not override viewport or device metrics yourself; the service ignores those CDP calls to keep the device configuration coherent |
+| `p_fp_tag` | `oxyfp_win` / `oxyfp_mac` / `oxyfp_mac_optimized` / `oxyfp_v1_win` | `oxyfp_win` | Browser profile family for `p_device=desktop` (the operating system the browser configuration presents). `oxyfp_win`: Windows, applied automatically when omitted. `oxyfp_mac`: macOS. `oxyfp_mac_optimized`: macOS tuned for the new engine, **use only with `p_src=oxybrowser`**. `oxyfp_v1_win`: the previous Windows family, kept for backward compatibility; prefer `oxyfp_win`. All are desktop families: do not combine with `p_device=mobile`, which keeps its own profile. Any other tag fails the handshake with `500 Internal Server Error` (HTML body): fix the tag, do not retry |
+
+## Browser engine
+
+| Parameter | Format | Default | Meaning and rules |
+|-----------|--------|---------|-------------------|
+| `p_src` | `oxybrowser` | default engine | Selects the browser engine. Omitted: the default engine. `oxybrowser`: the new engine, the escalation rung for sites with bot management (`targets.md` section 4), best combined with `p_fp_tag=oxyfp_mac_optimized`. Unknown value: `400 invalid source: <value>`. Not on your plan: `403 source 'oxybrowser' is not allowed` |
 
 ## Profiles
 
@@ -58,12 +65,21 @@ profile; a fresh `newContext()` is isolated from it.
 
 | Parameter | Format | Default | Meaning and rules |
 |-----------|--------|---------|-------------------|
-| `bargs` | see docs | none | Chrome browser arguments (`disable-notifications`, `window-position:X,Y`, `hide-scrollbars`, `force-color-profile:<p>`, `enable-features:<f>`); repeat the key for several values. Rarely needed; do not use it to change the fingerprint |
+| `bargs` | see docs | none | Chrome browser arguments (`disable-notifications`, `window-position:X,Y`, `hide-scrollbars`, `force-color-profile:<p>`, `enable-features:<f>`); repeat the key for several values. Rarely needed; do not use it to change the device configuration |
+
+## Challenge handling
+
+| Parameter | Format | Default | Meaning and rules |
+|-----------|--------|---------|-------------------|
+| `page_handler` | `true` / `false` | account setting | Absent, your account's setting applies (handling may be on), so always pass it explicitly. Enables the in-browser page handler, which identifies every page, completes the access challenges it finds and reports the page state (`challenges.md`). Keep it identical on every connection to a target. Not on your plan: `400 page handler is not enabled for this account`. Rules, the page status and code: `challenges.md` |
 
 ## Combination rules
 
 - `p_city` needs `p_cc` or `p_state`; `p_state` beats `p_cc`.
 - `proxy=dc` rejects `p_cc`, `p_state`, `p_city`, `proxy_resi_ses_id`, `proxy_resi_ses_time`.
 - `keep_alive=true` needs `session_name`; `o_profile_save=true` needs `o_profile`; `record_name` needs `record=true`.
-- For one identity keep `p_cc`, `p_state`, `p_city`, `p_device`, `o_profile`, `proxy_resi_ses_id` and
-  `proxy_resi_ses_time` identical on every connection.
+- `p_fp_tag=oxyfp_mac_optimized` needs `p_src=oxybrowser`; the `oxyfp_*` tags are desktop families (`p_device=desktop`).
+- For one identity keep `p_cc`, `p_state`, `p_city`, `p_device`, `p_src`, `p_fp_tag`, `o_profile`, `proxy_resi_ses_id`,
+  `proxy_resi_ses_time` and `page_handler` identical on every connection.
+
+*This content is not intended to provide legal advice, and scraping activities may be subject to applicable laws and regulations.*

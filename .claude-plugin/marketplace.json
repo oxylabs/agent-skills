@@ -6,13 +6,13 @@
     "email": "support@oxylabs.io",
     "url": "https://oxylabs.io"
   },
-  "description": "Oxylabs agent skills — proxies, web scraping, headless browsers, and video data extraction.",
+  "description": "Oxylabs agent skills — proxies, web scraping, Agent Browser, and video data extraction.",
   "version": "1.0.0",
   "plugins": [
     {
       "name": "oxylabs",
       "source": "./",
-      "description": "Bundle of Oxylabs skills: residential/mobile/datacenter/ISP proxies, Web Scraper API, Web Unblocker, headless browsers, and YouTube video data extraction.",
+      "description": "Bundle of Oxylabs skills: residential/mobile/datacenter/ISP proxies, Web Scraper API, Web Unblocker, Agent Browser, and YouTube video data extraction.",
       "author": {
         "name": "Oxylabs",
         "url": "https://oxylabs.io"
@@ -23,7 +23,7 @@
         "scraping",
         "web-scraper",
         "web-unblocker",
-        "headless-browser",
+        "agent-browser",
         "playwright",
         "puppeteer",
         "youtube",

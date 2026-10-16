@@ -11,7 +11,7 @@ page traffic ─────────── HTTP responses; X-Error-Descripti
 ```
 
 1. **Handshake** (`connectOverCDP` / `puppeteer.connect` throws). Body is a short text: either a `CDP_*` code
-   or a human sentence. Playwright's message is `WebSocket error: <full URL incl. password> <status> <status
+   or a plain-English sentence. Playwright's message is `WebSocket error: <full URL incl. password> <status> <status
    text>` followed by the body on the next line; Puppeteer's is `Unexpected server response: <status>`; raw
    WebSocket clients get the HTTP response. **Redact the password before logging.** No session exists,
    nothing to close.
@@ -63,6 +63,7 @@ jitter). Retry `409` only after the conflicting session has had time to close (3
 | `record should be boolean` | `true`/`false` |
 | `record_name requires record=true` | Add `record=true` |
 | `record_name must contain only letters, numbers, hyphens, and underscores (max 64 characters)` | Fix the name |
+| `page handler is not enabled for this account` | Drop `page_handler` or ask support |
 
 ### 403 Forbidden
 
@@ -139,3 +140,5 @@ page shows block / 403 wall?
   ├─ X-Error-Description present .... Oxylabs network issue: backoff + retry
   └─ absent ......................... target decision: change identity, geo, device, pacing (targets.md)
 ```
+
+*This content is not intended to provide legal advice, and scraping activities may be subject to applicable laws and regulations.*

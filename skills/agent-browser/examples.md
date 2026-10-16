@@ -1,17 +1,17 @@
 # Examples
 
-All examples read `OXY_UNBLOCKER_USERNAME` / `OXY_UNBLOCKER_PASSWORD` (aliases `OXY_HB_USERNAME` /
-`OXY_HB_PASSWORD`) and connect to `wss://USERNAME:PASSWORD@hb.oxylabs.io`. The `endpointUrl`, `connectWithBackoff`,
-`blockHeavyResources`, `watchOxylabsErrors` and `scrape` helpers are the ones from
-`scripts/playwright_scrape.js`.
+All examples read `OXY_AB_USERNAME` / `OXY_AB_PASSWORD` and connect to `wss://USERNAME:PASSWORD@hb.oxylabs.io`. The `endpointUrl`, `connectWithBackoff`,
+`blockHeavyResources`, `watchOxylabsErrors`, `watchPageStatus`, `waitForPageStatus` and `scrape` helpers are the ones from
+`scripts/playwright_scrape.js`. Challenge handling snippets (page status listeners for every client, manual trigger,
+retry on error, profile setup with a challenge) are in `challenges.md`.
 
 ## Puppeteer
 
 ```javascript
 const puppeteer = require("puppeteer");
 
-const USERNAME = process.env.OXY_UNBLOCKER_USERNAME || process.env.OXY_HB_USERNAME;
-const PASSWORD = process.env.OXY_UNBLOCKER_PASSWORD || process.env.OXY_HB_PASSWORD;
+const USERNAME = process.env.OXY_AB_USERNAME;
+const PASSWORD = process.env.OXY_AB_PASSWORD;
 // Same policy as scripts/playwright_scrape.js: Puppeteer reports "Unexpected server response: <status>" without the body.
 const RETRYABLE =
   /\b(429|50[0234]) [A-Z]|response: (429|50[0234])\b|CDP_SESSION_IN_USE|CDP_NO_BROWSERS_AVAILABLE|CDP_BROWSER_OVERWORKED|CDP_BAD_PROXY|CDP_GENERAL_ERROR|[Tt]imeout|ECONNRESET/;
@@ -30,6 +30,8 @@ async function connect(params, attempts = 6) {
 }
 
 (async () => {
+  // Most jobs need only p_cc. Blocked after a fresh identity with the right geo? Next rung (targets.md section 4):
+  // connect({ p_cc: "US", p_src: "oxybrowser", p_fp_tag: "oxyfp_mac_optimized" })
   const browser = await connect({ p_cc: "US" });
   try {
     const page = await browser.newPage();
@@ -55,8 +57,8 @@ async function connect(params, attempts = 6) {
 import asyncio, os, random, re
 from playwright.async_api import async_playwright
 
-USERNAME = os.environ.get("OXY_UNBLOCKER_USERNAME") or os.environ["OXY_HB_USERNAME"]
-PASSWORD = os.environ.get("OXY_UNBLOCKER_PASSWORD") or os.environ["OXY_HB_PASSWORD"]
+USERNAME = os.environ["OXY_AB_USERNAME"]
+PASSWORD = os.environ["OXY_AB_PASSWORD"]
 RETRYABLE = re.compile(  # same policy as scripts/playwright_scrape.py
     r"\b(429|50[0234]) [A-Z]|response: (429|50[0234])\b|CDP_SESSION_IN_USE|CDP_NO_BROWSERS_AVAILABLE|"
     r"CDP_BROWSER_OVERWORKED|CDP_BAD_PROXY|CDP_GENERAL_ERROR|[Tt]imeout|ECONNRESET")
@@ -102,8 +104,8 @@ service reports as `401 missing auth header`. Build the header yourself. The ser
 URL-safe base64 alphabet and requires exactly one `:` in the decoded value.
 
 ```javascript
-const USERNAME = process.env.OXY_UNBLOCKER_USERNAME || process.env.OXY_HB_USERNAME;
-const PASSWORD = process.env.OXY_UNBLOCKER_PASSWORD || process.env.OXY_HB_PASSWORD;
+const USERNAME = process.env.OXY_AB_USERNAME;
+const PASSWORD = process.env.OXY_AB_PASSWORD;
 
 if (PASSWORD.includes(":")) throw new Error("password may not contain ':' for Basic auth");
 const token = Buffer.from(`${USERNAME}:${PASSWORD}`).toString("base64");
@@ -159,8 +161,8 @@ Puppeteer hand-over (process A):
 const puppeteer = require("puppeteer-core");
 const browser = await puppeteer.connect({ browserWSEndpoint: endpointUrl({ session_name: "job-42", p_cc: "US" }) });
 const page = await browser.newPage();
-await page.goto("https://example.com/login");
-// ... log in ...
+await page.goto("https://example.com/");
+// ... choose region and currency, accept the cookie banner ...
 await browser.disconnect(); // NOT close(): keeps the page and cookies for the next connection
 ```
 
@@ -171,7 +173,7 @@ const browser = await connectWithBackoff({ session_name: "job-42", p_cc: "US" })
 try {
   const ctx = browser.contexts()[0];
   const page = ctx.pages().find((p) => p.url().includes("example.com")) ?? (await ctx.newPage());
-  await page.goto("https://example.com/account"); // still logged in
+  await page.goto("https://example.com/catalog"); // region and currency choice still applied
 } finally {
   await browser.close(); // last user of the session: close for real
 }
@@ -183,8 +185,9 @@ session early, connect once more with `keep_alive=false` and close.
 
 ## Profile setup and consumer runs
 
-Most jobs need no profile: every session is a fresh fingerprint on a fresh IP. Use one when cookies must survive
-between jobs (DataDome clearance, a login). Then split the work in two roles. **Setup** runs once per profile and is
+Most jobs need no profile: every session is a fresh browser configuration on a fresh IP. Use one when cookies must
+survive between jobs (the cookie a site sets once its challenge completes, cookie consent, site preferences). Then
+split the work in two roles. **Setup** runs once per profile and is
 the only connection that sends `o_profile_save=true`. **Consumers** send `o_profile` alone: read-only, no write lock,
 so they can never hit `409` and can start while others run. In production these are two services: one prepares and
 validates profiles, the other only uses them.
@@ -195,7 +198,7 @@ const identity = {
   proxy_resi_ses_id: "acmeus01", proxy_resi_ses_time: "30",
 };
 
-// Setup service: run once per profile name. Earn the cookies, verify, close (closing writes the profile).
+// Setup service: run once per profile name. Let the site set its cookies, verify, close (closing writes the profile).
 async function setupProfile(entryUrl) {
   const browser = await connectWithBackoff({ ...identity, o_profile_save: "true" });
   try {
@@ -203,7 +206,7 @@ async function setupProfile(entryUrl) {
     const response = await page.goto(entryUrl, { waitUntil: "domcontentloaded" });
     await page.waitForTimeout(5000); // let late JS and cookies settle
     if ((await classify(page, response)) !== "ok") throw new Error("setup failed: block page, pick a new profile name"); // classify() from targets.md
-    // ... log in here if the target needs it ...
+    // ... accept cookie consent or set site preferences here if the target needs it ...
   } finally {
     await browser.close();
   }
@@ -260,3 +263,5 @@ async function mapWithPacing(urls, params, concurrency = 8, launchGapMs = 150) {
 
 Each `scrape` call opens and closes its own session, so `concurrency` is the number of concurrent sessions
 (default account cap 100).
+
+*This content is not intended to provide legal advice, and scraping activities may be subject to applicable laws and regulations.*
