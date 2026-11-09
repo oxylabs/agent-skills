@@ -5,15 +5,15 @@ USERNAME = os.environ["OXY_AB_USERNAME"]
 PASSWORD = os.environ["OXY_AB_PASSWORD"]
 ENDPOINT = "hb.oxylabs.io"
 
-# Connection parameters (parameters.md). Most jobs need only p_cc plus an explicit page_handler=false: every session
+# Connection parameters (parameters.md). Most jobs need only cc plus an explicit page_handler=false: every session
 # already gets a fresh browser configuration (default engine, Windows profile family oxyfp_win) and a fresh residential IP.
-PARAMS = {"p_cc": "US", "page_handler": "false"}
+PARAMS = {"cc": "US", "page_handler": "false"}
 # Block or verification page instead of the expected content? Reconnect with this; the page handler then
 # identifies every page and reports its state (challenges.md):
 CHALLENGE_ESCALATION = {"page_handler": "true"}
 # Escalation when a fresh identity with the right geo is still blocked (targets.md, section 4, rung 4):
 # the new browser engine with its macOS profile family. Desktop only; keep the pair for every later connection.
-ENGINE_ESCALATION = {"p_src": "oxybrowser", "p_fp_tag": "oxyfp_mac_optimized"}
+ENGINE_ESCALATION = {"browser": "oxybrowser", "fp_tag": "oxyfp_mac_optimized"}
 
 # Error messages contain the connection URL, i.e. the password. Redact before logging anything.
 redact = lambda text: str(text).replace(PASSWORD, "***")  # noqa: E731

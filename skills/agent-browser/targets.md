@@ -53,33 +53,33 @@ spending more sessions.
 
 ## 2. Use an identity only when the target needs one
 
-Start every target with `p_cc` only. Each session is already a new browser configuration on a new residential
+Start every target with `cc` only. Each session is already a new browser configuration on a new residential
 IP, and for most pages that is the most reliable setup. The order of work is fixed: first write a plain script
 and drive it through the escalation ladder (section 4); only if it still fails, recommend persistent profiles to
 the user and implement them after they agree. Add persistence only for a concrete reason:
 
 - **Sticky IP** (`proxy_resi_ses_id` + `proxy_resi_ses_time`): several connections must share one exit IP and
   cookie set (a cart, a multi-page flow that spans sessions).
-- **Stored profile** (`o_profile`): cookies must survive between jobs. On sites that check the first visit, that
+- **Stored profile** (`profile_name`): cookies must survive between jobs. On sites that check the first visit, that
   is the cookie the site sets once its first-page check completes; elsewhere it is cookie consent or site
   preferences (language, currency, region).
 
 Once you add them, the parameter set is one identity and must be identical on every connection:
 
 ```text
-setup (exactly once):  ?o_profile=<name>&o_profile_save=true&p_cc=<CC>[&p_state=..][&p_city=..]&p_device=..[&p_src=oxybrowser&p_fp_tag=oxyfp_mac_optimized]&proxy_resi_ses_id=<id>&proxy_resi_ses_time=30..120
-consumers           :  ?o_profile=<name>&p_cc=<CC>[&p_state=..][&p_city=..]&p_device=..[&p_src=oxybrowser&p_fp_tag=oxyfp_mac_optimized]&proxy_resi_ses_id=<id>&proxy_resi_ses_time=30..120
+setup (exactly once):  ?profile_name=<name>&profile_save=true&cc=<CC>[&state=..][&city=..]&device=..[&browser=oxybrowser&fp_tag=oxyfp_mac_optimized]&proxy_resi_ses_id=<id>&proxy_resi_ses_time=30..120
+consumers           :  ?profile_name=<name>&cc=<CC>[&state=..][&city=..]&device=..[&browser=oxybrowser&fp_tag=oxyfp_mac_optimized]&proxy_resi_ses_id=<id>&proxy_resi_ses_time=30..120
 ```
 
-The browser engine and profile family (`p_src`, `p_fp_tag`) are part of the identity too: a profile written on one
+The browser engine and profile family (`browser`, `fp_tag`) are part of the identity too: a profile written on one
 engine is read back on the same engine. So is `page_handler`: if the target showed a supported challenge, it is
 `true` on the setup run and every consumer run (`challenges.md` section 5).
 
-- **Setup run**: the only connection that sends `o_profile_save=true`. It loads the entry page, waits for the
+- **Setup run**: the only connection that sends `profile_save=true`. It loads the entry page, waits for the
   real page to render (the page handler reporting `open` is the signal), optionally accepts
   cookie consent or sets site preferences, verifies the page is the real one, then closes so the profile is
   written. In production this is a small service that prepares profiles and re-checks them before handing them out.
-- **Consumer runs**: `o_profile=<name>` without `o_profile_save`. Read-only, so they never take the write lock,
+- **Consumer runs**: `profile_name=<name>` without `profile_save`. Read-only, so they never take the write lock,
   never see `409`, and can start while others run. On sites with bot management still keep one active consumer per
   identity and pace it (section 3); parallelism comes from more identities, not more consumers on one.
 - A profile that starts drawing block pages is stale: do not re-save it from a consumer. Run setup again under a
@@ -93,14 +93,14 @@ engine is read back on the same engine. So is `page_handler`: if the target show
 
 | Do | Don't |
 |----|-------|
-| Keep `p_cc`/`p_state`/`p_city` fixed for the life of a profile | Change geo mid-job "to see if it helps" |
-| Keep `p_src`/`p_fp_tag` fixed for the life of a profile; switch engine only on a fresh identity (ladder rung 4) | Reuse a profile or sticky id across engines, or pair `oxyfp_mac_optimized` with the default engine |
+| Keep `cc`/`state`/`city` fixed for the life of a profile | Change geo mid-job "to see if it helps" |
+| Keep `browser`/`fp_tag` fixed for the life of a profile; switch engine only on a fresh identity (ladder rung 4) | Reuse a profile or sticky id across engines, or pair `oxyfp_mac_optimized` with the default engine |
 | Pass `page_handler=false` explicitly; switch to `true` on a fresh connection once the plain attempt showed a block or verification page, then keep it | Flap it between connections, or keep retrying a session the page handler reported `failed` on |
-| Match interaction to `p_device`: mobile = taps, small scrolls, portrait flow; desktop = mouse moves, hover, wider pages | Use `p_device=mobile` and then hover, right-click, or open 10 tabs |
+| Match interaction to `device`: mobile = taps, small scrolls, portrait flow; desktop = mouse moves, hover, wider pages | Use `device=mobile` and then hover, right-click, or open 10 tabs |
 | Let the service own viewport and User-Agent | Call `setViewportSize`, `emulate`, `setUserAgent`, or CDP `Emulation.*` overrides |
 | Use one page at a time per identity, 3 to 8 s between navigations, scroll before clicking | Fire 20 navigations in parallel from one identity |
 | Wait for `domcontentloaded` plus a random 2 to 5 s before reading the DOM | Read immediately and retry in a tight loop when data is missing |
-| Send `o_profile_save=true` from one setup run only; consumers use `o_profile` alone | Save the profile from consumers or on every connection (write lock, `409`, stale profiles re-saved) |
+| Send `profile_save=true` from one setup run only; consumers use `profile_name` alone | Save the profile from consumers or on every connection (write lock, `409`, stale profiles re-saved) |
 
 ## 4. Escalation ladder
 
@@ -114,13 +114,13 @@ request with the same identity is never a rung.
    then `open` means handled: done. `failed`, or `open` while the page is still a block page, means the handler
    cannot clear it: continue with rung 2, `page_handler=true` still on, at most 2 fresh identities.
 2. **Fresh identity**: a new session already means a new IP and browser configuration. If you were using a
-   profile or sticky id, also use a new `o_profile` name and a new `proxy_resi_ses_id`; same geo/device.
-3. **Broader geo**: drop `p_city`, then `p_state`; keep the country the site serves.
-4. **New browser engine**: `p_src=oxybrowser` together with `p_fp_tag=oxyfp_mac_optimized` (a macOS browser
-   profile tuned for that engine), same geo, `p_device=desktop`. This is the first rung for a site whose block
+   profile or sticky id, also use a new `profile_name` name and a new `proxy_resi_ses_id`; same geo/device.
+3. **Broader geo**: drop `city`, then `state`; keep the country the site serves.
+4. **New browser engine**: `browser=oxybrowser` together with `fp_tag=oxyfp_mac_optimized` (a macOS browser
+   profile tuned for that engine), same geo, `device=desktop`. This is the first rung for a site whose block
    is about the browser configuration rather than the IP (the signature repeats across fresh identities). Keep
    the pair for every later connection to that target; drop both again before trying rung 5.
-5. **Device switch**: `p_device=mobile` with a mobile interaction pattern (mobile layouts are often simpler and
+5. **Device switch**: `device=mobile` with a mobile interaction pattern (mobile layouts are often simpler and
    lighter). Mobile uses its own browser profile: do not send an `oxyfp_*` tag with it.
 6. **Slow down**: double the pauses, one identity at a time, `<= 30` pages per identity.
 7. **Inspect**: after 3 consecutive failures on the same target, fetch `__session_id` and watch the session
@@ -138,9 +138,9 @@ Starting values, not measured guarantees. Tune pacing down if you see block page
 
 | Setting | Start with | Why |
 |---------|------------|-----|
-| Geo | `p_cc` of the country the site serves; `p_state`/`p_city` only if results are geo-filtered that finely | Geo-filtered results need a matching exit country |
-| Device | `p_device=desktop` (default); `mobile` only if the site is mobile-first or desktop keeps failing | Must match the interaction pattern you drive |
-| Engine | Default engine and `p_fp_tag=oxyfp_win` (both implied). `p_src=oxybrowser&p_fp_tag=oxyfp_mac_optimized` once a fresh identity with the right geo is still blocked (section 4, rung 4) | The new engine presents a different browser configuration; keep it per target once it works |
+| Geo | `cc` of the country the site serves; `state`/`city` only if results are geo-filtered that finely | Geo-filtered results need a matching exit country |
+| Device | `device=desktop` (default); `mobile` only if the site is mobile-first or desktop keeps failing | Must match the interaction pattern you drive |
+| Engine | Default engine and `fp_tag=oxyfp_win` (both implied). `browser=oxybrowser&fp_tag=oxyfp_mac_optimized` once a fresh identity with the right geo is still blocked (section 4, rung 4) | The new engine presents a different browser configuration; keep it per target once it works |
 | Challenge handling | `page_handler=false`, explicit; `true` on a fresh connection after the first supported challenge, then kept per target | Most pages never challenge; unnecessary handling only adds time |
 | Identity | None. A profile (setup run + consumers, section 2) is what you recommend to the user once the plain script has failed the whole ladder, for example because the site sets a cookie on the first load and blocks more than 1 in 20 pages | Fresh sessions are the most reliable setup for most sites |
 | Pacing | 1 page every 5 to 8 s, scroll a listing before opening a detail page, interleave detail and listing pages | Spreads load evenly across page types |
