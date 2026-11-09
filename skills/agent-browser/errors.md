@@ -47,19 +47,19 @@ jitter). Retry `409` only after the conflicting session has had time to close (3
 | Body | Fix |
 |------|-----|
 | `invalid_uri, failed to decode query` | Malformed query string; check `&`/`=` and encoding of values |
-| `invalid_uri, invalid query: p_device must be one of [desktop mobile]` | Use `desktop` or `mobile` |
+| `invalid_uri, invalid query: device must be one of [desktop mobile]` | Use `desktop` or `mobile` |
 | `session_name must be 3-36 alphanumeric or '-' characters` | Only `[A-Za-z0-9-]`, 3 to 36 chars |
 | `keep_alive requires session_name` | Add `session_name` or drop `keep_alive` |
 | `unsupported proxy type "x", supported: resi, dc, ddc` | Use `resi` or `dc` |
 | `proxy type "x" is not enabled for this user` | Drop `proxy` (defaults to `resi`) or ask support |
-| `proxy=dc does not support [p_cc …] params` | Remove geo/sticky parameters or switch to `resi` |
+| `proxy=dc does not support [cc …] params` | Remove geo/sticky parameters or switch to `resi` |
 | `ddc proxy is not supported` | Use `resi` or `dc` |
-| `invalid p_cc, supported ISO-3166 2 letter codes` | Two-letter country code |
+| `invalid cc, supported ISO-3166 2 letter codes` | Two-letter country code |
 | `proxy_resi_ses_id must be 3–36 alphanumeric characters or underscores` | Start with a letter/digit; `[A-Za-z0-9_]`, 3 to 36 chars |
 | `proxy_resi_ses_time must be between 1 and 1440` | Integer minutes in range |
-| `o_profile must contain only letters, numbers, hyphens, and underscores (min 3, max 36 characters)` | Fix the profile name |
-| `o_profile_save requires o_profile to be set` | Add `o_profile` |
-| `o_profile_save should be boolean` | `true`/`false` |
+| `profile_name must contain only letters, numbers, hyphens, and underscores (min 3, max 36 characters)` | Fix the profile name |
+| `profile_save requires profile_name to be set` | Add `profile_name` |
+| `profile_save should be boolean` | `true`/`false` |
 | `record should be boolean` | `true`/`false` |
 | `record_name requires record=true` | Add `record=true` |
 | `record_name must contain only letters, numbers, hyphens, and underscores (max 64 characters)` | Fix the name |
@@ -69,7 +69,7 @@ jitter). Retry `409` only after the conflicting session has had time to close (3
 
 | Body | Fix |
 |------|-----|
-| `browser profile feature is not enabled for your account` | Remove `o_profile`; contact support to enable |
+| `browser profile feature is not enabled for your account` | Remove `profile_name`; contact support to enable |
 | `profile limit reached (N profiles maximum)` | Reuse a stable profile name, delete unused profiles in the dashboard, or request a higher cap |
 | `recordings are not enabled for this account` | Remove `record` |
 | `recording limit reached (N recordings maximum)` | Delete old recordings in the dashboard |
@@ -78,7 +78,7 @@ jitter). Retry `409` only after the conflicting session has had time to close (3
 
 | Body | Fix |
 |------|-----|
-| `profile is already in use by another session` | A run with `o_profile_save=true` (the setup run) still holds this profile. Wait for it to close (30 s+), then retry. Consumers must send `o_profile` without `o_profile_save`; if a consumer hit this, it is saving when it should not |
+| `profile is already in use by another session` | A run with `profile_save=true` (the setup run) still holds this profile. Wait for it to close (30 s+), then retry. Consumers must send `profile_name` without `profile_save`; if a consumer hit this, it is saving when it should not |
 
 ### 429 Too Many Requests
 
@@ -104,7 +104,7 @@ jitter). Retry `409` only after the conflicting session has had time to close (3
 |--------|---------|-----|
 | `CDP_NO_BROWSERS_AVAILABLE` | No browser could be allocated | Retry with backoff |
 | `CDP_BROWSER_OVERWORKED_1` | Allocated host is saturated | Retry with backoff |
-| `CDP_BAD_PROXY` | Proxy could not be established for the requested geo / sticky id | Retry; rotate `proxy_resi_ses_id`; drop `p_city` |
+| `CDP_BAD_PROXY` | Proxy could not be established for the requested geo / sticky id | Retry; rotate `proxy_resi_ses_id`; drop `city` |
 | `CDP_SESSION_NOT_FOUND` | Named session expired (10 min) before reconnect | Start a new session |
 | `CDP_SESSION_IN_USE` | Another connection grabbed the named session first | Close it, retry |
 | `CDP_GENERAL_ERROR` | Browser died or an internal step failed | New session with backoff |

@@ -16,8 +16,8 @@ use, and close the session when done. This file holds the rules; the detail live
 |------|-------|
 | Endpoint | `wss://USERNAME:PASSWORD@hb.oxylabs.io` |
 | Credentials | `OXY_AB_USERNAME` / `OXY_AB_PASSWORD` |
-| Options | URL query parameters only, e.g. `?p_cc=US&session_name=job-42` (see `parameters.md`) |
-| Browser engine | Default engine with the `oxyfp_win` browser profile; `p_src=oxybrowser` selects the new engine (see `parameters.md`) |
+| Options | URL query parameters only, e.g. `?cc=US&session_name=job-42` (see `parameters.md`) |
+| Browser engine | Default engine with the `oxyfp_win` browser profile; `browser=oxybrowser` selects the new engine (see `parameters.md`) |
 | Libraries | Playwright `chromium.connectOverCDP` (recommended), Puppeteer `puppeteer.connect`, any CDP client |
 | Dashboard / support | `https://hb.oxylabs.io/dashboard` · `support@oxylabs.io` |
 
@@ -37,10 +37,10 @@ Minimal shape (Playwright, JavaScript):
 
 ```javascript
 const { chromium } = require("playwright");
-const url = `wss://${process.env.OXY_AB_USERNAME}:${process.env.OXY_AB_PASSWORD}@hb.oxylabs.io?p_cc=US`;
+const url = `wss://${process.env.OXY_AB_USERNAME}:${process.env.OXY_AB_PASSWORD}@hb.oxylabs.io?cc=US`;
 const browser = await chromium.connectOverCDP(url, { timeout: 60000 });
 try {
-  const page = await browser.contexts()[0].newPage(); // default context: backed by the device configuration, proxy, o_profile
+  const page = await browser.contexts()[0].newPage(); // default context: backed by the device configuration, proxy, profile_name
   await page.goto("https://example.com", { waitUntil: "domcontentloaded", timeout: 30000 });
   console.log(await page.content());
 } finally {
@@ -73,7 +73,7 @@ Puppeteer, Python async, raw CDP, session hand-over, profiles, recording and fan
 | New sessions per second | 10 | `429 CDP_SESSION_RATE_LIMIT_REACHED` (space launches >= 150 ms) |
 | Concurrent sessions | 100 | `429 CDP_MAX_CONCURRENT_SESSIONS_REACHED` |
 | Named (resumable) sessions | 5 | `429 CDP_MAX_PERSISTENT_SESSIONS_REACHED` |
-| Stored profiles (`o_profile`) | 5 | `403 profile limit reached (5 profiles maximum)` |
+| Stored profiles (`profile_name`) | 5 | `403 profile limit reached (5 profiles maximum)` |
 | Recordings | 10 | `403 recording limit reached (10 recordings maximum)` |
 | Concurrent inspection viewers | 10 | `CDP_VNC_MAX_CONCURRENT_SESSIONS_REACHED` |
 
@@ -85,7 +85,7 @@ Puppeteer, Python async, raw CDP, session hand-over, profiles, recording and fan
   as an unrelated `429 CDP_MAX_CONCURRENT_SESSIONS_REACHED`. Closing the Playwright/Puppeteer object is enough.
 - `browser.close()` wipes open pages and cookies even though a named session stays resumable. To hand a session
   over use Puppeteer `browser.disconnect()` (see `examples.md`, "Resume a named session"). State that must
-  outlive a session (cookie consent, site preferences, a cart) belongs in `o_profile`, not keep-alive.
+  outlive a session (cookie consent, site preferences, a cart) belongs in `profile_name`, not keep-alive.
 - Every distinct parameter combination is provisioned separately: keep the set stable across a job.
 - Under load a connection may queue and end with `503 queue timeout` after about a minute: back off and retry.
   Higher limits via support.
@@ -119,10 +119,10 @@ Every message text with cause and fix: `errors.md`.
 
 ## 5. Reliable access on sites with bot management
 
-**Default parameter set for most jobs: `p_cc` and an explicit `page_handler=false`, nothing else.** Every session already gets a fresh browser
+**Default parameter set for most jobs: `cc` and an explicit `page_handler=false`, nothing else.** Every session already gets a fresh browser
 configuration and a fresh residential IP, which is what one-shot fetches and fan-outs of independent pages need.
-Sticky IPs and stored profiles are opt-in tools for a specific need, never a baseline. The browser engine (`p_src`) and
-browser profile family (`p_fp_tag`, default `oxyfp_win`) are escalation tools: leave them at their defaults until a
+Sticky IPs and stored profiles are opt-in tools for a specific need, never a baseline. The browser engine (`browser`) and
+browser profile family (`fp_tag`, default `oxyfp_win`) are escalation tools: leave them at their defaults until a
 target blocks the plain script.
 
 **Work order for a site with bot management.** First write a plain script and make it pass: one fresh session per
@@ -134,34 +134,34 @@ go-ahead. Never add a profile or sticky id on your own initiative.
 | Need | Add | Not for |
 |------|-----|---------|
 | Several connections must share one exit IP and cookie set (a cart, a multi-page flow that outlives one session) | `proxy_resi_ses_id` + `proxy_resi_ses_time` | one page per session |
-| Cookies must survive between jobs (the cookie a site sets once its challenge completes, cookie consent, site preferences) | `o_profile`, prepared once by a setup run, after the user agreed | a first attempt; targets that serve without a block |
+| Cookies must survive between jobs (the cookie a site sets once its challenge completes, cookie consent, site preferences) | `profile_name`, prepared once by a setup run, after the user agreed | a first attempt; targets that serve without a block |
 | Resume the same browser within 10 minutes | `session_name` | everything else |
-| The target still blocks a fresh identity with the right geo | `p_src=oxybrowser` + `p_fp_tag=oxyfp_mac_optimized` (desktop only) | a first attempt; sites that serve without a block |
+| The target still blocks a fresh identity with the right geo | `browser=oxybrowser` + `fp_tag=oxyfp_mac_optimized` (desktop only) | a first attempt; sites that serve without a block |
 
 When you do use them, the combination is one identity. Keep it consistent:
 
 ```text
-setup, exactly once :  ?o_profile=acme-us-01&o_profile_save=true&p_cc=US&proxy_resi_ses_id=acmeus01&proxy_resi_ses_time=30
-consumers, any number:  ?o_profile=acme-us-01&p_cc=US&proxy_resi_ses_id=acmeus01&proxy_resi_ses_time=30
+setup, exactly once :  ?profile_name=acme-us-01&profile_save=true&cc=US&proxy_resi_ses_id=acmeus01&proxy_resi_ses_time=30
+consumers, any number:  ?profile_name=acme-us-01&cc=US&proxy_resi_ses_id=acmeus01&proxy_resi_ses_time=30
 ```
 
 - **A profile is written by one run and read by the others.** The setup run is the only connection that ever sends
-  `o_profile_save=true`: it loads the entry page, lets the site set its cookies (challenge completion, consent,
-  preferences), verifies the page, closes. Consumer runs send `o_profile=<name>` alone: read-only, no write lock,
+  `profile_save=true`: it loads the entry page, lets the site set its cookies (challenge completion, consent,
+  preferences), verifies the page, closes. Consumer runs send `profile_name=<name>` alone: read-only, no write lock,
   no `409`. Never "top up" a profile from a consumer; when it stops working, run setup again under a new name. In
   production this is a setup service that prepares and validates profiles and a consumer service that only uses
   them (`examples.md`, "Profile setup and consumer runs").
 - `proxy_resi_ses_id` + `proxy_resi_ses_time` pin the exit IP (max 1440 min). A pinned id disables automatic
   proxy retry: on `CDP_BAD_PROXY` rotate to a new id.
-- **Never change `p_cc`/`p_city`/`p_state`, `p_src` or `p_fp_tag` for an identity** that has cookies. Start a new profile
+- **Never change `cc`/`city`/`state`, `browser` or `fp_tag` for an identity** that has cookies. Start a new profile
   and sticky id.
-- Match interaction to `p_device`: `mobile` = taps, small scrolls, no hover; `desktop` (default) = the opposite.
+- Match interaction to `device`: `mobile` = taps, small scrolls, no hover; `desktop` (default) = the opposite.
   Never set viewport or device metrics yourself; the service owns the device configuration.
 - Pace requests: 3 to 8 s between page loads, scroll before clicking, one page at a time per identity.
   Run parallel identities, not parallel tabs.
 - Escalation when blocked, one rung per fresh connection: let the page handler try with `page_handler=true` (section 6)
-  → fresh session → broader geo (drop `p_city`) →
-  new browser engine (`p_src=oxybrowser&p_fp_tag=oxyfp_mac_optimized`, keep `p_device=desktop`) → `p_device=mobile`
+  → fresh session → broader geo (drop `city`) →
+  new browser engine (`browser=oxybrowser&fp_tag=oxyfp_mac_optimized`, keep `device=desktop`) → `device=mobile`
   (back on the default engine) → slow down → inspect (section 7) → recommend persistent profiles to the user → stop
   and report. Repeating an identical request is never a rung.
 

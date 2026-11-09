@@ -4,15 +4,15 @@ const USERNAME = process.env.OXY_AB_USERNAME;
 const PASSWORD = process.env.OXY_AB_PASSWORD;
 const ENDPOINT = "hb.oxylabs.io";
 
-// Connection parameters (parameters.md). Most jobs need only p_cc plus an explicit page_handler=false: every session
+// Connection parameters (parameters.md). Most jobs need only cc plus an explicit page_handler=false: every session
 // already gets a fresh browser configuration (default engine, Windows profile family oxyfp_win) and a fresh residential IP.
-const PARAMS = { p_cc: "US", page_handler: "false" };
+const PARAMS = { cc: "US", page_handler: "false" };
 // Block or verification page instead of the expected content? Reconnect with this; the page handler then
 // identifies every page and reports its state (challenges.md):
 const CHALLENGE_ESCALATION = { page_handler: "true" };
 // Escalation when a fresh identity with the right geo is still blocked (targets.md, section 4, rung 4):
 // the new browser engine with its macOS profile family. Desktop only; keep the pair for every later connection.
-const ENGINE_ESCALATION = { p_src: "oxybrowser", p_fp_tag: "oxyfp_mac_optimized" };
+const ENGINE_ESCALATION = { browser: "oxybrowser", fp_tag: "oxyfp_mac_optimized" };
 
 // Concatenate; never round-trip the result through `new URL()` (re-encodes the password -> 401).
 function endpointUrl(params = {}) {
@@ -112,7 +112,7 @@ async function clearPageStatus(page) {
 async function scrape(targetUrl, params) {
   const browser = await connectWithBackoff(params);
   try {
-    // Use the default context: it is the one backed by the device configuration, proxy and o_profile storage.
+    // Use the default context: it is the one backed by the device configuration, proxy and profile storage.
     const context = browser.contexts()[0] ?? (await browser.newContext());
     await watchPageStatus(context); // before the page exists, so a page-load challenge is captured
     const page = await context.newPage();

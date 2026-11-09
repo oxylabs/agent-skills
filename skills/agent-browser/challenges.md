@@ -57,7 +57,7 @@ the handler itself, and the code.
 ## 3. On a status with `error`
 
 Do not keep hammering the same session. Close it, back off (10 s, doubling), reconnect as a **fresh
-identity** (new session; if you used them, a new `proxy_resi_ses_id` and a new `o_profile` name or none), same
+identity** (new session; if you used them, a new `proxy_resi_ses_id` and a new `profile_name` name or none), same
 geo and device, `page_handler=true` still on. At most **2 more attempts**, then stop and report that the
 challenge cannot be completed right now (`targets.md` section 6, with every `oxylabs-page-status` line and
 its timestamp). Errors on every identity in a row point at the network or the target, not at your
@@ -81,8 +81,8 @@ parameters: that report goes to `support@oxylabs.io`.
   setup run **and** every consumer run, identically:
 
 ```text
-setup, exactly once :  ?o_profile=acme-us-01&o_profile_save=true&p_cc=US&proxy_resi_ses_id=acmeus01&proxy_resi_ses_time=30&page_handler=true
-consumers, any number:  ?o_profile=acme-us-01&p_cc=US&proxy_resi_ses_id=acmeus01&proxy_resi_ses_time=30&page_handler=true
+setup, exactly once :  ?profile_name=acme-us-01&profile_save=true&cc=US&proxy_resi_ses_id=acmeus01&proxy_resi_ses_time=30&page_handler=true
+consumers, any number:  ?profile_name=acme-us-01&cc=US&proxy_resi_ses_id=acmeus01&proxy_resi_ses_time=30&page_handler=true
 ```
 
 - The setup run loads the entry page, waits for the page to be `open`, verifies the real page rendered (not a
@@ -199,7 +199,7 @@ def clear_page_status(page):
 The same init script and wait, with each library's own calls:
 
 ```javascript
-const browser = await connect({ p_cc: "US", page_handler: "true" }); // connect() from the Puppeteer example in examples.md
+const browser = await connect({ cc: "US", page_handler: "true" }); // connect() from the Puppeteer example in examples.md
 const page = await browser.newPage();
 await page.evaluateOnNewDocument(() => {
   window.addEventListener("message", (e) => {
@@ -216,7 +216,7 @@ console.log("page status:", await terminal.jsonValue());
 ```
 
 ```python
-browser = await connect(pw, {"p_cc": "US", "page_handler": "true"})  # connect() from the Python async example in examples.md
+browser = await connect(pw, {"cc": "US", "page_handler": "true"})  # connect() from the Python async example in examples.md
 context = browser.contexts[0]
 await context.add_init_script(PAGE_STATUS_INIT_SCRIPT)  # from the sync template above
 page = await context.new_page()
@@ -279,7 +279,7 @@ async function scrapeWithChallengeHandling(targetUrl, params, maxIdentities = 3)
   for (let attempt = 0; attempt < maxIdentities; attempt++) {
     const identity = { ...params, page_handler: "true" };
     if (params.proxy_resi_ses_id) identity.proxy_resi_ses_id = `${params.proxy_resi_ses_id}_${attempt}`;
-    if (params.o_profile) identity.o_profile = `${params.o_profile}-${attempt}`; // new name, never re-save the stale one
+    if (params.profile_name) identity.profile_name = `${params.profile_name}-${attempt}`; // new name, never re-save the stale one
     try {
       return await scrape(targetUrl, identity); // scrape() from scripts/playwright_scrape.js
     } catch (err) {
@@ -297,13 +297,13 @@ every connection of the identity because the plain attempt on this target showed
 
 ```javascript
 const identity = {
-  o_profile: "acme-us-01", p_cc: "US", p_device: "desktop",
+  profile_name: "acme-us-01", cc: "US", device: "desktop",
   proxy_resi_ses_id: "acmeus01", proxy_resi_ses_time: "30",
   page_handler: "true", // identical on setup and consumers
 };
 
 async function setupProfile(entryUrl) {
-  const browser = await connectWithBackoff({ ...identity, o_profile_save: "true" });
+  const browser = await connectWithBackoff({ ...identity, profile_save: "true" });
   try {
     const context = browser.contexts()[0];
     await watchPageStatus(context);
@@ -324,7 +324,7 @@ async function setupProfile(entryUrl) {
 }
 
 await setupProfile("https://target.example/");
-await scrape("https://target.example/listing/1", identity); // consumers: o_profile without o_profile_save
+await scrape("https://target.example/listing/1", identity); // consumers: profile_name without profile_save
 ```
 
 *This content is not intended to provide legal advice, and scraping activities may be subject to applicable laws and regulations.*
