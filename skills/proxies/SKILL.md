@@ -97,6 +97,7 @@ For Residential/Mobile, append username parameters with hyphens unless noted:
 | `st` | US states with `us_` prefix | `-st-us_california`, `-st-us_texas` |
 | `postalcode` | 5-digit US ZIP, pair with `cc-US` | `-cc-US-postalcode-90210` |
 | `ASN` | Residential/Mobile carrier ASN | `-ASN-21928` |
+| `geohash` | 4-character encoded Geohash | `geohash-9q8y` |
 | `X-Oxylabs-Geolocation` | Proxy header `lat:lon;radius_miles` | `49.9235:-97.0811;10` |
 
 ZIP targeting is US-only. Coordinate radius cannot be lower than 10 miles. If both country and ASN are used, country applies.
