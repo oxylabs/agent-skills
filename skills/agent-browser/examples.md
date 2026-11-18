@@ -30,9 +30,9 @@ async function connect(params, attempts = 6) {
 }
 
 (async () => {
-  // Most jobs need only p_cc. Blocked after a fresh identity with the right geo? Next rung (targets.md section 4):
-  // connect({ p_cc: "US", p_src: "oxybrowser", p_fp_tag: "oxyfp_mac_optimized" })
-  const browser = await connect({ p_cc: "US" });
+  // Most jobs need only cc. Blocked after a fresh identity with the right geo? Next rung (targets.md section 4):
+  // connect({ cc: "US", browser: "oxybrowser", fp_tag: "oxyfp_mac_optimized" })
+  const browser = await connect({ cc: "US" });
   try {
     const page = await browser.newPage();
     await page.setRequestInterception(true);
@@ -78,7 +78,7 @@ async def connect(pw, params, attempts=6):
 
 async def main():
     async with async_playwright() as pw:
-        browser = await connect(pw, {"p_cc": "US"})
+        browser = await connect(pw, {"cc": "US"})
         try:
             context = browser.contexts[0] if browser.contexts else await browser.new_context()
             page = await context.new_page()
@@ -111,7 +111,7 @@ if (PASSWORD.includes(":")) throw new Error("password may not contain ':' for Ba
 const token = Buffer.from(`${USERNAME}:${PASSWORD}`).toString("base64");
 if (/[+/]/.test(token)) console.warn("base64 contains + or /; use base64url encoding: " + Buffer.from(`${USERNAME}:${PASSWORD}`).toString("base64url"));
 
-const ws = new WebSocket("wss://hb.oxylabs.io/?p_cc=US", { headers: { Authorization: `Basic ${token}` } });
+const ws = new WebSocket("wss://hb.oxylabs.io/?cc=US", { headers: { Authorization: `Basic ${token}` } });
 let nextId = 1;
 const pending = new Map();
 const send = (method, params = {}, sessionId) =>
@@ -159,7 +159,7 @@ Puppeteer hand-over (process A):
 
 ```javascript
 const puppeteer = require("puppeteer-core");
-const browser = await puppeteer.connect({ browserWSEndpoint: endpointUrl({ session_name: "job-42", p_cc: "US" }) });
+const browser = await puppeteer.connect({ browserWSEndpoint: endpointUrl({ session_name: "job-42", cc: "US" }) });
 const page = await browser.newPage();
 await page.goto("https://example.com/");
 // ... choose region and currency, accept the cookie banner ...
@@ -169,7 +169,7 @@ await browser.disconnect(); // NOT close(): keeps the page and cookies for the n
 Resume (process B, within 10 minutes, same credentials; Playwright or Puppeteer):
 
 ```javascript
-const browser = await connectWithBackoff({ session_name: "job-42", p_cc: "US" }); // 429 CDP_SESSION_IN_USE while A is still attached
+const browser = await connectWithBackoff({ session_name: "job-42", cc: "US" }); // 429 CDP_SESSION_IN_USE while A is still attached
 try {
   const ctx = browser.contexts()[0];
   const page = ctx.pages().find((p) => p.url().includes("example.com")) ?? (await ctx.newPage());
@@ -188,19 +188,19 @@ session early, connect once more with `keep_alive=false` and close.
 Most jobs need no profile: every session is a fresh browser configuration on a fresh IP. Use one when cookies must
 survive between jobs (the cookie a site sets once its challenge completes, cookie consent, site preferences). Then
 split the work in two roles. **Setup** runs once per profile and is
-the only connection that sends `o_profile_save=true`. **Consumers** send `o_profile` alone: read-only, no write lock,
+the only connection that sends `profile_save=true`. **Consumers** send `profile_name` alone: read-only, no write lock,
 so they can never hit `409` and can start while others run. In production these are two services: one prepares and
 validates profiles, the other only uses them.
 
 ```javascript
 const identity = {
-  o_profile: "acme-us-01", p_cc: "US", p_device: "desktop",
+  profile_name: "acme-us-01", cc: "US", device: "desktop",
   proxy_resi_ses_id: "acmeus01", proxy_resi_ses_time: "30",
 };
 
 // Setup service: run once per profile name. Let the site set its cookies, verify, close (closing writes the profile).
 async function setupProfile(entryUrl) {
-  const browser = await connectWithBackoff({ ...identity, o_profile_save: "true" });
+  const browser = await connectWithBackoff({ ...identity, profile_save: "true" });
   try {
     const page = await browser.contexts()[0].newPage();
     const response = await page.goto(entryUrl, { waitUntil: "domcontentloaded" });
@@ -212,7 +212,7 @@ async function setupProfile(entryUrl) {
   }
 }
 
-// Consumer service: any number of runs, never o_profile_save.
+// Consumer service: any number of runs, never profile_save.
 await setupProfile("https://target.example/");
 await scrape("https://target.example/listing/1", identity);
 await scrape("https://target.example/listing/2", identity);
@@ -225,7 +225,7 @@ across setup and consumers. When consumers start seeing block pages, do not re-s
 ## Session id, live inspection and recording
 
 ```javascript
-const browser = await connectWithBackoff({ p_cc: "US", record: "true", record_name: "job-42" });
+const browser = await connectWithBackoff({ cc: "US", record: "true", record_name: "job-42" });
 try {
   const context = browser.contexts()[0];
   const page = await context.newPage();
